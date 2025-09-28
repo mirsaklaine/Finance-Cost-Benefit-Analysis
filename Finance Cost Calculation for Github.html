@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edison Real Estate - Finance Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a4b8c;
+            --secondary: #d4af37;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --text: #333333;
+            --border: #e0e0e0;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 15px;
+            min-height: 100vh;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #0d3a6b 100%);
+            color: white;
+            padding: 20px 25px;
+            text-align: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            margin-right: 12px;
+            color: var(--secondary);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+        
+        .content {
+            padding: 20px 25px;
+        }
+        
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 75, 140, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--primary), #0d3a6b);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            margin-right: 6px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 75, 140, 0.3);
+        }
+        
+        .btn-generate {
+            background: linear-gradient(to right, var(--secondary), #e6c44d);
+            color: var(--dark);
+            grid-column: 1 / -1;
+            margin-top: 8px;
+        }
+        
+        .btn-generate:hover {
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+        
+        .btn-download {
+            background: linear-gradient(to right, #28a745, #20c997);
+            margin-top: 15px;
+        }
+        
+        .tables-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        
+        .card-header {
+            background: var(--light);
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            padding: 0 8px 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+        
+        th {
+            background: var(--light);
+            color: var(--primary);
+            font-weight: 600;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: rgba(26, 75, 140, 0.03);
+        }
+        
+        .payment-status {
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        
+        .early {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+        
+        .late {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
+        .on-time {
+            background-color: rgba(13, 58, 107, 0.1);
+            color: var(--primary);
+        }
+        
+        .finance-summary {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .benefit {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        
+        .late-fee {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+        
+        .net-total {
+            background-color: rgba(13, 58, 107, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            font-size: 1.1rem;
+            margin-top: 15px;
+        }
+        
+        .per-sft {
+            background-color: rgba(212, 175, 55, 0.1);
+            color: #b6951c;
+            border-left: 4px solid var(--secondary);
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+        
+        .btn-add {
+            background: var(--success);
+            padding: 8px 12px;
+            font-size: 13px;
+            width: auto;
+        }
+        
+        .btn-remove {
+            background: var(--danger);
+            padding: 6px 10px;
+            font-size: 11px;
+            width: auto;
+        }
+        
+        .sale-value-display {
+            background: #e8f4ff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: 600;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .download-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 25px;
+            color: var(--dark);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                font-size: 13px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .input-section {
+                grid-template-columns: 1fr;
+                padding: 12px;
+            }
+            
+            .card-header {
+                padding: 10px 12px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .card-header h2 {
+                margin-bottom: 8px;
+                font-size: 1.1rem;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .finance-summary {
+                padding: 15px;
+            }
+            
+            .summary-item {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .tables-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <div>
+                    <h1>Edison Real Estate</h1>
+                    <div class="subtitle">Finance Cost Calculator</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="projectName"><i class="fas fa-building"></i> Project Name:</label>
+                    <input type="text" id="projectName" placeholder="Enter project name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="apartmentNo"><i class="fas fa-home"></i> Apartment No:</label>
+                    <input type="text" id="apartmentNo" placeholder="Enter apartment number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="apartmentSize"><i class="fas fa-ruler-combined"></i> Apartment Size (SFT):</label>
+                    <input type="number" id="apartmentSize" min="0" step="1" value="1200" onchange="updateSaleValue()">
+                </div>
+                
+                <div class="form-group">
+                    <label for="map"><i class="fas fa-tag"></i> MAP (Price per SFT):</label>
+                    <input type="number" id="map" min="0" step="1" value="500" onchange="updateSaleValue()">
+                </div>
+                
+                <div class="form-group">
+                    <label for="pu"><i class="fas fa-car"></i> Parking & Utilities:</label>
+                    <input type="number" id="pu" min="0" step="100" value="50000" onchange="updateSaleValue()">
+                </div>
+                
+                <div class="form-group">
+                    <label for="startDate"><i class="fas fa-calendar-alt"></i> Start Date:</label>
+                    <input type="date" id="startDate">
+                </div>
+                
+                <div class="form-group">
+                    <label for="handoverDate"><i class="fas fa-home"></i> Handover Date:</label>
+                    <input type="date" id="handoverDate">
+                </div>
+                
+                <div class="form-group">
+                    <label for="interestRate"><i class="fas fa-percentage"></i> Annual Interest Rate (%):</label>
+                    <input type="number" id="interestRate" min="0" step="0.1" value="14">
+                </div>
+                
+                <div class="sale-value-display">
+                    <span>Calculated Sale Value: $</span>
+                    <span id="saleValueDisplay">0</span>
+                </div>
+                
+                <button class="btn-generate" onclick="generateSchedule()">
+                    <i class="fas fa-calculator"></i> Generate Payment Schedule
+                </button>
+            </div>
+            
+            <div id="scheduleContainer" class="hidden">
+                <div class="download-section">
+                    <button class="btn-download" onclick="downloadExcel()">
+                        <i class="fas fa-file-excel"></i> Download Excel Report
+                    </button>
+                </div>
+                
+                <div class="tables-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-calendar-check"></i> EREL Schedule</h2>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="proposedSchedule">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Due Date</th>
+                                        <th>Type</th>
+                                        <th>%</th>
+                                        <th>Amount ($)</th>
+                                        <th>Cumulative %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="proposedScheduleBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-user-clock"></i> Customer Payment Schedule</h2>
+                            <button class="btn-add" onclick="addCustomerPayment()">
+                                <i class="fas fa-plus"></i> Add Payment
+                            </button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="customerSchedule">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Payment Date</th>
+                                        <th>%</th>
+                                        <th>Amount ($)</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customerScheduleBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-file-invoice-dollar"></i> Payment Comparison & Finance Calculation</h2>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="comparisonTable">
+                            <thead>
+                                <tr>
+                                    <th>Schedule Payment</th>
+                                    <th>Due Date</th>
+                                    <th>Due Amount ($)</th>
+                                    <th>Customer Payment</th>
+                                    <th>Payment Date</th>
+                                    <th>Paid Amount ($)</th>
+                                    <th>Days Diff</th>
+                                    <th>Status</th>
+                                    <th>Finance Impact ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparisonBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="finance-summary">
+                    <h3><i class="fas fa-chart-bar"></i> Finance Summary</h3>
+                    <div class="summary-item benefit">
+                        <span>Total Benefits:</span>
+                        <span id="totalBenefits">$0.00</span>
+                    </div>
+                    <div class="summary-item late-fee">
+                        <span>Total Late Fees:</span>
+                        <span id="totalLateFees">$0.00</span>
+                    </div>
+                    <div class="summary-item net-total">
+                        <span>Net Finance Impact:</span>
+                        <span id="netImpact">$0.00</span>
+                    </div>
+                    <div class="summary-item per-sft">
+                        <span>Financial Impact per SFT:</span>
+                        <span id="impactPerSft">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Edison Real Estate &copy; 2023 | Professional Financial Solutions for Your Property Investments</p>
+        </footer>
+    </div>
+
+    <script>
+        let proposedSchedule = [];
+        let customerPayments = [];
+        let comparisonData = [];
+        let financeSummary = {};
+        
+        // Calculate sale value based on inputs
+        function updateSaleValue() {
+            const apartmentSize = parseFloat(document.getElementById('apartmentSize').value) || 0;
+            const map = parseFloat(document.getElementById('map').value) || 0;
+            const pu = parseFloat(document.getElementById('pu').value) || 0;
+            
+            const saleValue = (apartmentSize * map) + pu;
+            document.getElementById('saleValueDisplay').textContent = saleValue.toLocaleString('en-US', {
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2
+            });
+        }
+        
+        // Get the calculated sale value
+        function getSaleValue() {
+            const apartmentSize = parseFloat(document.getElementById('apartmentSize').value) || 0;
+            const map = parseFloat(document.getElementById('map').value) || 0;
+            const pu = parseFloat(document.getElementById('pu').value) || 0;
+            
+            return (apartmentSize * map) + pu;
+        }
+        
+        function generateSchedule() {
+            const startDate = new Date(document.getElementById('startDate').value);
+            const handoverDate = new Date(document.getElementById('handoverDate').value);
+            const saleValue = getSaleValue();
+            
+            if (!startDate || !handoverDate || isNaN(saleValue) || saleValue <= 0) {
+                alert('Please fill in all fields with valid values');
+                return;
+            }
+            
+            if (handoverDate <= startDate) {
+                alert('Handover date must be after start date');
+                return;
+            }
+            
+            // Generate payment schedule
+            proposedSchedule = [];
+            
+            // 1. First payment: 10% on start date
+            proposedSchedule.push({
+                installment: 1,
+                dueDate: new Date(startDate),
+                paymentType: 'Initial',
+                percentage: 10,
+                amount: saleValue * 0.10,
+                cumulativePercentage: 10
+            });
+            
+            // 2. Second payment: 20% after 45 days
+            const secondPaymentDate = new Date(startDate);
+            secondPaymentDate.setDate(secondPaymentDate.getDate() + 45);
+            proposedSchedule.push({
+                installment: 2,
+                dueDate: secondPaymentDate,
+                paymentType: '45 Days',
+                percentage: 20,
+                amount: saleValue * 0.20,
+                cumulativePercentage: 30
+            });
+            
+            // 3. Installment payments: 55% split into equal installments
+            const installmentPercentage = 55;
+            const daysBetweenPayments = 90;
+            
+            // Calculate number of installments for remaining amount
+            const daysBetweenSecondAndHandover = Math.floor((handoverDate - secondPaymentDate) / (1000 * 60 * 60 * 24));
+            const numberOfInstallments = Math.max(1, Math.floor(daysBetweenSecondAndHandover / daysBetweenPayments));
+            
+            const installmentAmount = saleValue * (installmentPercentage / 100) / numberOfInstallments;
+            const eachInstallmentPercentage = installmentPercentage / numberOfInstallments;
+            let cumulative = 30;
+            
+            for (let i = 1; i <= numberOfInstallments; i++) {
+                const installmentDate = new Date(secondPaymentDate);
+                installmentDate.setDate(installmentDate.getDate() + (i * daysBetweenPayments));
+                
+                // Ensure installment date doesn't exceed handover date
+                if (installmentDate < handoverDate) {
+                    cumulative += eachInstallmentPercentage;
+                    proposedSchedule.push({
+                        installment: 2 + i,
+                        dueDate: installmentDate,
+                        paymentType: `Installment ${i}`,
+                        percentage: eachInstallmentPercentage,
+                        amount: installmentAmount,
+                        cumulativePercentage: cumulative
+                    });
+                }
+            }
+            
+            // 4. Handover payment: 15% on handover date (always last)
+            proposedSchedule.push({
+                installment: proposedSchedule.length + 1,
+                dueDate: new Date(handoverDate),
+                paymentType: 'Handover',
+                percentage: 15,
+                amount: saleValue * 0.15,
+                cumulativePercentage: 100
+            });
+            
+            // Initialize customer payments with first payment
+            customerPayments = [
+                {
+                    id: 1,
+                    paymentDate: new Date(startDate),
+                    percentage: 10,
+                    amount: saleValue * 0.10
+                }
+            ];
+            
+            // Display schedules
+            displayProposedSchedule();
+            displayCustomerSchedule();
+            calculateFinanceCosts();
+            
+            // Show the schedule container
+            document.getElementById('scheduleContainer').classList.remove('hidden');
+            
+            // Scroll to results for better user experience
+            document.getElementById('scheduleContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function displayProposedSchedule() {
+            const tbody = document.getElementById('proposedScheduleBody');
+            tbody.innerHTML = '';
+            
+            proposedSchedule.forEach(item => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${item.installment}</td>
+                    <td>${formatDate(item.dueDate)}</td>
+                    <td>${item.paymentType}</td>
+                    <td>${item.percentage.toFixed(2)}%</td>
+                    <td>$${item.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>${item.cumulativePercentage.toFixed(2)}%</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function displayCustomerSchedule() {
+            const tbody = document.getElementById('customerScheduleBody');
+            tbody.innerHTML = '';
+            
+            customerPayments.forEach((payment, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><input type="date" value="${formatDate(payment.paymentDate)}" onchange="updateCustomerPayment(${payment.id}, 'paymentDate', this.value)"></td>
+                    <td><input type="number" value="${payment.percentage}" step="0.01" min="0" onchange="updateCustomerPayment(${payment.id}, 'percentage', this.value)"></td>
+                    <td>$${payment.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td><button class="btn-remove" onclick="removeCustomerPayment(${payment.id})"><i class="fas fa-trash"></i> Remove</button></td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function addCustomerPayment() {
+            const saleValue = getSaleValue();
+            const newId = customerPayments.length > 0 ? Math.max(...customerPayments.map(p => p.id)) + 1 : 1;
+            
+            customerPayments.push({
+                id: newId,
+                paymentDate: new Date(),
+                percentage: 0,
+                amount: 0
+            });
+            
+            displayCustomerSchedule();
+            calculateFinanceCosts();
+        }
+        
+        function removeCustomerPayment(id) {
+            customerPayments = customerPayments.filter(p => p.id !== id);
+            displayCustomerSchedule();
+            calculateFinanceCosts();
+        }
+        
+        function updateCustomerPayment(id, field, value) {
+            const payment = customerPayments.find(p => p.id === id);
+            if (!payment) return;
+            
+            if (field === 'paymentDate') {
+                payment.paymentDate = new Date(value);
+            } else if (field === 'percentage') {
+                const saleValue = getSaleValue();
+                payment.percentage = parseFloat(value);
+                payment.amount = saleValue * (payment.percentage / 100);
+            }
+            
+            displayCustomerSchedule();
+            calculateFinanceCosts();
+        }
+        
+        function calculateFinanceCosts() {
+            const saleValue = getSaleValue();
+            const apartmentSize = parseFloat(document.getElementById('apartmentSize').value) || 1; // Avoid division by zero
+            const annualRate = parseFloat(document.getElementById('interestRate').value) / 100;
+            const dailyRate = annualRate / 365;
+            
+            // Sort both schedules by date
+            const sortedProposed = [...proposedSchedule].sort((a, b) => a.dueDate - b.dueDate);
+            const sortedPayments = [...customerPayments].sort((a, b) => a.paymentDate - b.paymentDate);
+            
+            let totalBenefits = 0;
+            let totalLateFees = 0;
+            comparisonData = [];
+            
+            // Separate handover payment from installment payments
+            const handoverPayment = sortedProposed.find(p => p.paymentType === 'Handover');
+            const installmentPayments = sortedProposed.filter(p => p.paymentType !== 'Handover');
+            
+            // Track paid amounts for each proposed payment
+            const paidAmounts = Array(sortedProposed.length).fill(0);
+            
+            // Process each customer payment
+            sortedPayments.forEach((payment, paymentIndex) => {
+                let remainingAmount = payment.amount;
+                
+                // First, try to assign to installment payments in order
+                for (let i = 0; i < installmentPayments.length && remainingAmount > 0; i++) {
+                    const proposed = installmentPayments[i];
+                    const proposedIndex = sortedProposed.findIndex(p => 
+                        p.dueDate.getTime() === proposed.dueDate.getTime() && 
+                        p.percentage === proposed.percentage
+                    );
+                    
+                    const dueAmount = proposed.amount;
+                    const alreadyPaid = paidAmounts[proposedIndex];
+                    const remainingDue = dueAmount - alreadyPaid;
+                    
+                    if (remainingDue > 0) {
+                        const amountToAssign = Math.min(remainingAmount, remainingDue);
+                        
+                        const daysDifference = Math.floor((payment.paymentDate - proposed.dueDate) / (1000 * 60 * 60 * 24));
+                        const financeImpact = amountToAssign * dailyRate * daysDifference;
+                        
+                        if (daysDifference < 0) {
+                            totalBenefits += Math.abs(financeImpact);
+                        } else if (daysDifference > 0) {
+                            totalLateFees += financeImpact;
+                        }
+                        
+                        comparisonData.push({
+                            proposedPayment: `${proposed.installment} (${proposed.paymentType})`,
+                            dueDate: formatDate(proposed.dueDate),
+                            dueAmount: dueAmount,
+                            customerPayment: `${paymentIndex + 1}`,
+                            paymentDate: formatDate(payment.paymentDate),
+                            paidAmount: amountToAssign,
+                            daysDifference: daysDifference,
+                            status: daysDifference < 0 ? 'Early' : (daysDifference > 0 ? 'Late' : 'On Time'),
+                            financeImpact: financeImpact
+                        });
+                        
+                        paidAmounts[proposedIndex] += amountToAssign;
+                        remainingAmount -= amountToAssign;
+                    }
+                }
+                
+                // If there's remaining amount after assigning to all installments, assign to handover payment
+                if (remainingAmount > 0 && handoverPayment) {
+                    const proposedIndex = sortedProposed.findIndex(p => p.paymentType === 'Handover');
+                    const dueAmount = handoverPayment.amount;
+                    const alreadyPaid = paidAmounts[proposedIndex];
+                    const remainingDue = dueAmount - alreadyPaid;
+                    
+                    const amountToAssign = Math.min(remainingAmount, remainingDue);
+                    
+                    const daysDifference = Math.floor((payment.paymentDate - handoverPayment.dueDate) / (1000 * 60 * 60 * 24));
+                    const financeImpact = amountToAssign * dailyRate * daysDifference;
+                    
+                    if (daysDifference < 0) {
+                        totalBenefits += Math.abs(financeImpact);
+                    } else if (daysDifference > 0) {
+                        totalLateFees += financeImpact;
+                    }
+                    
+                    comparisonData.push({
+                        proposedPayment: `${handoverPayment.installment} (${handoverPayment.paymentType})`,
+                        dueDate: formatDate(handoverPayment.dueDate),
+                        dueAmount: dueAmount,
+                        customerPayment: `${paymentIndex + 1}`,
+                        paymentDate: formatDate(payment.paymentDate),
+                        paidAmount: amountToAssign,
+                        daysDifference: daysDifference,
+                        status: daysDifference < 0 ? 'Early' : (daysDifference > 0 ? 'Late' : 'On Time'),
+                        financeImpact: financeImpact
+                    });
+                    
+                    paidAmounts[proposedIndex] += amountToAssign;
+                    remainingAmount -= amountToAssign;
+                }
+            });
+            
+            // Show unpaid proposed payments
+            sortedProposed.forEach((proposed, index) => {
+                if (paidAmounts[index] < proposed.amount) {
+                    comparisonData.push({
+                        proposedPayment: `${proposed.installment} (${proposed.paymentType})`,
+                        dueDate: formatDate(proposed.dueDate),
+                        dueAmount: proposed.amount,
+                        customerPayment: 'Not Paid',
+                        paymentDate: '-',
+                        paidAmount: 0,
+                        daysDifference: '-',
+                        status: 'Pending',
+                        financeImpact: 0
+                    });
+                }
+            });
+            
+            // Store finance summary for Excel export
+            const netImpact = totalBenefits - totalLateFees;
+            const impactPerSft = netImpact / apartmentSize;
+            
+            financeSummary = {
+                totalBenefits,
+                totalLateFees,
+                netImpact,
+                impactPerSft,
+                apartmentSize,
+                saleValue
+            };
+            
+            // Display comparison table
+            displayComparisonTable(comparisonData);
+            
+            // Update summary
+            document.getElementById('totalBenefits').textContent = `$${totalBenefits.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('totalLateFees').textContent = `$${totalLateFees.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('netImpact').textContent = `$${netImpact.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('impactPerSft').textContent = `$${impactPerSft.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+        
+        function displayComparisonTable(data) {
+            const tbody = document.getElementById('comparisonBody');
+            tbody.innerHTML = '';
+            
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                
+                let statusClass = '';
+                if (item.status === 'Early') statusClass = 'early';
+                else if (item.status === 'Late') statusClass = 'late';
+                else if (item.status === 'On Time') statusClass = 'on-time';
+                else if (item.status === 'Pending') statusClass = '';
+                
+                row.innerHTML = `
+                    <td>${item.proposedPayment}</td>
+                    <td>${item.dueDate}</td>
+                    <td>$${item.dueAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>${item.customerPayment}</td>
+                    <td>${item.paymentDate}</td>
+                    <td>$${item.paidAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>${item.daysDifference}</td>
+                    <td><span class="payment-status ${statusClass}">${item.status}</span></td>
+                    <td>$${item.financeImpact.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        // Download Excel function
+        function downloadExcel() {
+            const projectName = document.getElementById('projectName').value || 'Project';
+            const apartmentNo = document.getElementById('apartmentNo').value || 'AptNo';
+            const currentDate = new Date().toISOString().slice(0, 10);
+            
+            // Create a new workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Add EREL Schedule sheet
+            const erelData = proposedSchedule.map(item => [
+                item.installment,
+                formatDate(item.dueDate),
+                item.paymentType,
+                item.percentage + '%',
+                item.amount,
+                item.cumulativePercentage + '%'
+            ]);
+            
+            erelData.unshift(['#', 'Due Date', 'Type', 'Percentage', 'Amount ($)', 'Cumulative %']);
+            const erelSheet = XLSX.utils.aoa_to_sheet(erelData);
+            XLSX.utils.book_append_sheet(wb, erelSheet, 'EREL Schedule');
+            
+            // Add Customer Payment Schedule sheet
+            const customerData = customerPayments.map((payment, index) => [
+                index + 1,
+                formatDate(payment.paymentDate),
+                payment.percentage + '%',
+                payment.amount
+            ]);
+            
+            customerData.unshift(['#', 'Payment Date', 'Percentage', 'Amount ($)']);
+            const customerSheet = XLSX.utils.aoa_to_sheet(customerData);
+            XLSX.utils.book_append_sheet(wb, customerSheet, 'Customer Payments');
+            
+            // Add Payment Comparison sheet
+            const comparisonExcelData = comparisonData.map(item => [
+                item.proposedPayment,
+                item.dueDate,
+                item.dueAmount,
+                item.customerPayment,
+                item.paymentDate,
+                item.paidAmount,
+                item.daysDifference,
+                item.status,
+                item.financeImpact
+            ]);
+            
+            comparisonExcelData.unshift([
+                'Schedule Payment', 
+                'Due Date', 
+                'Due Amount ($)', 
+                'Customer Payment', 
+                'Payment Date', 
+                'Paid Amount ($)', 
+                'Days Difference', 
+                'Status', 
+                'Finance Impact ($)'
+            ]);
+            
+            const comparisonSheet = XLSX.utils.aoa_to_sheet(comparisonExcelData);
+            XLSX.utils.book_append_sheet(wb, comparisonSheet, 'Payment Comparison');
+            
+            // Add Finance Summary sheet
+            const summaryData = [
+                ['Finance Summary'],
+                [],
+                ['Total Benefits', financeSummary.totalBenefits],
+                ['Total Late Fees', financeSummary.totalLateFees],
+                ['Net Finance Impact', financeSummary.netImpact],
+                ['Financial Impact per SFT', financeSummary.impactPerSft]
+            ];
+            
+            const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, summarySheet, 'Finance Summary');
+            
+            // Generate filename with project name, apartment number, and date
+            const filename = `${projectName}_${apartmentNo}_${currentDate}.xlsx`;
+            
+            // Download the file
+            XLSX.writeFile(wb, filename);
+        }
+        
+        // Initialize with today's date and a future handover date
+        window.onload = function() {
+            const today = new Date();
+            const handoverDate = new Date();
+            handoverDate.setMonth(today.getMonth() + 12);
+            
+            document.getElementById('startDate').value = formatDate(today);
+            document.getElementById('handoverDate').value = formatDate(handoverDate);
+            
+            // Calculate initial sale value
+            updateSaleValue();
+        };
+    </script>
+</body>
+</html>
